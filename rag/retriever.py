@@ -1,5 +1,5 @@
-from vectorstore import VectorStore
-from embeddings import Embedding_manager
+from rag.vectorstore import VectorStore
+from rag.embeddings import Embedding_manager
 from typing import List, Dict, Any
 from utils.config import RetrieverConfig
 from logger import logging

@@ -14,7 +14,7 @@ class EmbeddingConfig:
 @dataclass
 class VectorStoreConfig:
     collection_name: str = "pdf_documents"
-    persist_dir: str = "../db"
+    persist_dir: str = "db"
     
 @dataclass
 class RetrieverConfig:
@@ -23,4 +23,4 @@ class RetrieverConfig:
     
 @dataclass
 class IngestConfig:
-    pdf_dir: str = "../data/pdfs"
+    pdf_dir: str = "data/pdfs"

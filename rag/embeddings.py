@@ -22,6 +22,6 @@ class Embedding_manager:
     def create_embeddings(self, texts: List[str]) -> np.ndarray:
         if not self.model:
             raise ValueError("Model not loaded")
-        embeddings = self.model.encode(texts, show_progress_bar=True)
+        embeddings = self.model.encode(texts, show_progress_bar=False)
         logging.info(f"Generated embedding of shape: {embeddings.shape}")
-        return embeddings.detach().cpu().numpy()
+        return embeddings
