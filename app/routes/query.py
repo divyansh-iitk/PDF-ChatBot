@@ -1,26 +1,23 @@
-from fastapi import APIRouter, HTTPException
-from rag.chain import GroqLLM
+from fastapi import APIRouter, HTTPException, Request
 from app.schemas.query import QueryRequest
 from logger import logging
 from rag.retriever import RAGRetriver
-from rag.embeddings import Embedding_manager
-from rag.vectorstore import VectorStore
 
 router = APIRouter()
 
 
 @router.post("/query")
-async def query_pdf(request: QueryRequest):
+async def query_pdf(request: Request, body: QueryRequest):
     """
     Query ingested PDFs
     """
 
     try:
         # Step 1: Retrieve documents
-        vector_store = VectorStore()
-        embedding_manager = Embedding_manager()
+        vector_store = request.app.state.vector_store
+        embedding_manager = request.app.state.embedding_manager
         retriever = RAGRetriver(vector_store, embedding_manager)
-        retrieved_docs = retriever.retrieve(request.question)
+        retrieved_docs = retriever.retrieve(body.question)
 
         if not retrieved_docs:
             return {
@@ -29,9 +26,9 @@ async def query_pdf(request: QueryRequest):
             }
 
         # Step 2: Generate answer
-        llm = GroqLLM()
+        llm = request.app.state.llm
         answer = llm.generate_response(
-            query=request.question,
+            query=body.question,
             retrieved_docs=retrieved_docs
         )
 

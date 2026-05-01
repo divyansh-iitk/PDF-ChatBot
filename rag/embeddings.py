@@ -3,6 +3,8 @@ from sentence_transformers import SentenceTransformer
 from typing import List
 from utils.config import EmbeddingConfig
 from logger import logging
+from langchain_community.retrievers import BM25Retriever
+from langchain_core.documents import Document
 
 
 class Embedding_manager:
