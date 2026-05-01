@@ -18,7 +18,7 @@ class Embedding_manager:
             self.model = SentenceTransformer(self.model_name)
             logging.info(f"Embedding model loaded successfully. Embedding domensions = {self.model.get_embedding_dimension()}")
         except Exception as e:
-            logging.info(f"Error loading model {self.model_name}: {e}")
+            logging.error(f"Error loading model {self.model_name}: {e}")
             raise
     
     def create_embeddings(self, texts: List[str]) -> np.ndarray:

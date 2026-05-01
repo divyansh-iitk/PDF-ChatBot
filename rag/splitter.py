@@ -26,6 +26,7 @@ def split_documents(documents: List[Document], chunk_size = SplitterConfig.chunk
         splitted_docs = text_splitter.split_documents(documents)
         
     except Exception as e:
-        raise print(f"Error: {e}")
+        logging.error(f"Error: {e}")
+        raise
     logging.info(f"Splitted {len(documents)} documents into {len(splitted_docs)} chunks")
     return splitted_docs

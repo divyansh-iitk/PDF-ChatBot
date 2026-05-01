@@ -30,7 +30,7 @@ class VectorStore:
             logging.info(f"Vector store initialised with collection name: {self.collection_name}")
             logging.info(f"Existing document in collection: {self.collection.count()}")
         except Exception as e:
-            print(f"Error in initialising vector store: {e}")
+            logging.error(f"Error in initialising vector store: {e}")
             raise
     
     def add_documents(self, documents: List[Any], embeddings: np.ndarray):
@@ -86,5 +86,5 @@ class VectorStore:
             logging.info(f"Total documents in the collection: {self.collection.count()}")
 
         except Exception as e:
-            print(f"Error adding to vector store: {e}")
+            logging.error(f"Error adding to vector store: {e}")
             raise

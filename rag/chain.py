@@ -50,7 +50,7 @@ class GroqLLM:
         context = self._format_context(retrieved_docs)
 
         # Safety trim
-        context = context[:4000]
+        # context = context[:4000]
 
         formatted_prompt = self.prompt_template.format(
             context=context,
@@ -68,4 +68,4 @@ class GroqLLM:
 
         except Exception as e:
             logging.error(f"LLM error: {e}")
-            return "Error generating response"
+            raise

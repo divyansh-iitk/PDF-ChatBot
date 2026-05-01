@@ -64,6 +64,7 @@ class RAGRetriver:
                 logging.info(f"No documents found")
             return retrieved_docs
         except Exception as e:
-            logging.info(f"Error in retrieving documents: {e}")
+            logging.error(f"Error in retrieving documents: {e}")
+            raise
             return []
         
