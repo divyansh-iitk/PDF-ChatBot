@@ -26,6 +26,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
             with open(file_path, "wb") as f:
                 f.write(await file.read())
             logging.info(f"File saved at {file_path}")
+            flag = True
         else:
             logging.info(f"File already exists at {file_path}, skipping save.")
             flag = False
