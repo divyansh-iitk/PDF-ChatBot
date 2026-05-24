@@ -5,13 +5,18 @@ from rag.embeddings import Embedding_manager
 from rag.vectorstore import VectorStore
 from rag.chain import GroqLLM
 from app.routes import upload, query
+from logger import logging
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 🔹 Startup logic
-    app.state.vector_store = VectorStore()
-    app.state.embedding_manager = Embedding_manager()
-    app.state.llm = GroqLLM()
+    try:
+        app.state.vector_store = VectorStore()
+        app.state.embedding_manager = Embedding_manager()
+        app.state.llm = GroqLLM()
+    except Exception as e:
+        logging.error(f"Error while app startup: {e}")
+        raise
 
     print("✅ Models loaded")
 

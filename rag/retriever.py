@@ -1,4 +1,5 @@
 from langchain_core.retrievers import BaseRetriever
+from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
 from rag.vectorstore import VectorStore
 from rag.embeddings import Embedding_manager
@@ -17,6 +18,8 @@ class RAGRetriver(BaseRetriever):
     def _get_relevant_documents(
         self,
         query: str,
+        *,
+        run_manager: CallbackManagerForRetrieverRun,
         ) -> List[Document]:
         """
         Retrieve relevant documents for a query
@@ -62,10 +65,10 @@ class RAGRetriver(BaseRetriever):
                                 page_content=document,
                                 metadata={
                                     **metadata,
-                                    'id': doc_id,
-                                    'similarity_score': similarity_score,
-                                    'distance': distance,
-                                    'rank': i + 1
+                                    # 'id': doc_id,
+                                    # 'similarity_score': similarity_score,
+                                    # 'distance': distance,
+                                    # 'rank': i + 1
                                     }
                                 )
                             retrieved_docs.append(doc)

@@ -18,7 +18,7 @@ class VectorStoreConfig:
     
 @dataclass
 class RetrieverConfig:
-    top_k: int = 7
+    top_k: int = 10
     score_threshold: float = 0.0
     
 @dataclass
@@ -28,4 +28,12 @@ class IngestConfig:
     
 @dataclass
 class BM25Config:
-    top_k: int = 7
+    top_k: int = 10
+    
+
+@dataclass
+class EnsembleConfig:
+    weight_BM25 = 0.5
+    weigth_vector_retriever = 0.5
+    weights = [weight_BM25, weigth_vector_retriever]
+    id_key = "uid"

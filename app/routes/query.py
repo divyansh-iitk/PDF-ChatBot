@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from app.schemas.query import QueryRequest
 from logger import logging
 from rag.retriever import RAGRetriver
-from langchain_classic.retrievers.ensemble import EnsembleRetriever
+from rag.ensemble_retriever import ensemble_retriever
 
 router = APIRouter()
 
@@ -19,14 +19,7 @@ async def query_pdf(request: Request, body: QueryRequest):
         embedding_manager = request.app.state.embedding_manager
         vector_retriever = RAGRetriver(vector_store=vector_store, embedding_manager=embedding_manager)
         bm25_retriever = request.app.state.bm25_retriever        
-        ensemble_retriever = EnsembleRetriever(
-
-            retrievers=[bm25_retriever, vector_retriever],
-
-            weights=[0.5, 0.5]
-
-        )
-        retrieved_docs = ensemble_retriever.invoke(body.question.lower().strip())
+        retrieved_docs = ensemble_retriever(bm25_retriever, vector_retriever, body)
 
         if not retrieved_docs:
             return {
@@ -47,7 +40,6 @@ async def query_pdf(request: Request, body: QueryRequest):
                 {
                     "content": doc.page_content,
                     "metadata": doc.metadata,
-                    "score": doc.metadata.get("similarity_score")
                 }
                 for doc in retrieved_docs
             ],
