@@ -1,0 +1,65 @@
+name: Deploy application to AWS EC2
+
+on:
+  push:
+    branches: [test_deploy]
+
+jobs:
+  Continuous-Integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS Credential
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{secrets.AWS_DEFAULT_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag and push image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY_BACKEND: ${{ secrets.ECR_REPO_BACKEND }}
+          ECR_REPOSITORY_FRONTEND: ${{ secrets.ECR_REPO_FRONTEND }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG ./frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+  
+  Continuous-Deployment:
+    needs: Continuous-Integration
+    runs-on: self-hosted
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Run Docker Image to serve users
+        run: |
+          docker network inspect app-network >/dev/null 2>&1 || docker network create app-network
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO_BACKEND }}:latest
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPO_FRONTEND }}:latest
+          docker stop backend >/dev/null 2>&1 || true
+          docker rm backend >/dev/null 2>&1 || true
+          docker stop frontend >/dev/null 2>&1 || true
+          docker rm frontend >/dev/null 2>&1 || true
+          docker run -d -e GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}" -e COHERE_API_KEY="${{ secrets.COHERE_API_KEY }}" -e HF_TOKEN="${{ secrets.HF_TOKEN }}" --network app-network --name backend "${{ steps.login-ecr.outputs.registry }}"/"${{ secrets.ECR_REPO_BACKEND }}":latest
+          docker run -d -e BACKEND_URL="${{ secrets.BACKEND_URL }}" -p 8501:8501 --network app-network --name frontend "${{ steps.login-ecr.outputs.registry }}"/"${{ secrets.ECR_REPO_FRONTEND }}":latest
